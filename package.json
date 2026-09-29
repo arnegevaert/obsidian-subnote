@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "obsidian-subnote",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Add a subnote to the current file, named FILE.TITLE.md.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
