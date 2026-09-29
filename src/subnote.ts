@@ -1,4 +1,4 @@
-import { App, Modal, normalizePath, Notice, Setting, TFile } from 'obsidian';
+import { App, Editor, Modal, normalizePath, Notice, Setting, TFile } from 'obsidian';
 
 export class SubnoteTitleModal extends Modal {
 	private title = '';
@@ -50,7 +50,13 @@ export class SubnoteTitleModal extends Modal {
 	}
 }
 
-export async function createSubnote(app: App, parent: TFile, title: string): Promise<void> {
+export async function createSubnote(
+	app: App,
+	parent: TFile,
+	title: string,
+	editor: Editor,
+	upPropertyKey: string,
+): Promise<void> {
 	const folderPath = parent.parent && !parent.parent.isRoot() ? parent.parent.path : '';
 	const path = normalizePath(`${folderPath}/${parent.basename}.${title}.md`);
 
@@ -60,8 +66,14 @@ export async function createSubnote(app: App, parent: TFile, title: string): Pro
 	}
 
 	try {
-		const file = await app.vault.create(path, '');
-		await app.workspace.getLeaf(false).openFile(file);
+		const upLink = app.fileManager.generateMarkdownLink(parent, path);
+		const content = `---\n${upPropertyKey}: ${JSON.stringify(upLink)}\n---\n# ${title}\n`;
+		const file = await app.vault.create(path, content);
+
+		const downLink = app.fileManager.generateMarkdownLink(file, parent.path);
+		editor.replaceSelection(downLink);
+
+		await app.workspace.getLeaf('split', 'vertical').openFile(file);
 	} catch (error) {
 		new Notice(`Could not create subnote: ${error instanceof Error ? error.message : String(error)}`);
 	}
